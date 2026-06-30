@@ -1,5 +1,8 @@
 #include "/opt/homebrew/include/boost/lockfree/spsc_queue.hpp"
 #include <ApplicationServices/ApplicationServices.h>
+#include <CoreFoundation/CFBase.h>
+#include <CoreFoundation/CFMachPort.h>
+#include <CoreFoundation/CFRunLoop.h>
 #include <CoreGraphics/CGEvent.h>
 #include <CoreGraphics/CGEventTypes.h>
 #include <chrono>
@@ -8,15 +11,9 @@
 #include <string.h>
 #include <thread>
 
-// Initial IMPL will only focus on keys being pressed down, not on the
-// difference in time between being pressed up HOWEVER, that is an important
-// characteristic to be added
-
 // Going to use boost.Lockfree for initial IMPL; later versions can utilize DIY
 // SPSC queue
 
-// std::string is not acceptable for boost.lockfree.spsc_queue so instead using
-// char struct
 enum class EventKind { Key, Mouse };
 
 // May have to convert CGFloat
@@ -27,9 +24,8 @@ struct InputEvent {
   CGFloat x;
   CGFloat y;
   std::chrono::time_point<std::chrono::steady_clock> timestamp;
-  // To add mouse dragged
-  // Similarly, left/right mouse down (aka pressed)
-  // Consequently, also when let go
+  // ADD mouse dragged, mouse down, mouse let go
+  // ADD current window open
 };
 
 static CGEventRef input_sensor(CGEventTapProxy proxy, CGEventType type,
@@ -64,10 +60,36 @@ int main() {
   std::atomic<bool> running{true};
 
   // Consumer thread
-  // std::thread consumer([])
+  std::thread consumer([&running, &q]() {
+    while (running.load()) {
+      InputEvent ev;
+      while (q.pop(ev)) {
+        // Process information
+        // Send information to database
+        if (ev.key_code != 0)
+          std::cout << ev.key_code << std::endl;
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(3));
+    }
+  });
 
   // Event tap
   CGEventMask mask = (1 << kCGEventKeyDown) | (1 << kCGEventMouseMoved);
-  // CFMachPortRef handle = CGEventTapCreate(kCGHIDEventTap, kCGTail)
+  CFMachPortRef handle =
+      CGEventTapCreate(kCGHIDEventTap, kCGTailAppendEventTap,
+                       kCGEventTapOptionListenOnly, mask, input_sensor, &q);
+
+  CFRunLoopSourceRef source =
+      CFMachPortCreateRunLoopSource(kCFAllocatorDefault, handle, 0);
+  CFRunLoopAddSource(CFRunLoopGetMain(), source, kCFRunLoopCommonModes);
+
+  // Indefintely running the loop
+  CFRunLoopRun();
+
+  // If loop ever exists, leave
+  running.store(false);
+  consumer.join();
+  CFRelease(source);
+  CFRelease(handle);
   return 0;
 }
