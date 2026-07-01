@@ -5,11 +5,15 @@
 #include <CoreFoundation/CFRunLoop.h>
 #include <CoreGraphics/CGEvent.h>
 #include <CoreGraphics/CGEventTypes.h>
+#include <boost/interprocess/managed_shared_memory.hpp>
 #include <chrono>
 #include <cstdint>
+#include <fcntl.h>
 #include <iostream>
 #include <string.h>
+#include <sys/mman.h>
 #include <thread>
+#include <unistd.h>
 
 // Going to use boost.Lockfree for initial IMPL; later versions can utilize DIY
 // SPSC queue
@@ -54,22 +58,39 @@ int main() {
   }
   */
 
-  // Create shared space
+  // Create queue space
   constexpr std::size_t capacity = 128;
   boost::lockfree::spsc_queue<InputEvent> q(capacity);
   std::atomic<bool> running{true};
 
+  // Create shared memory object
+  const char *shm_name = "/BIBSharedMem";
+  const size_t SHM_SIZE = sizeof(InputEvent);
+  // May want to change mode permissions
+  int fd = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
+  ftruncate(fd, SHM_SIZE);
+
+  // Map shared mem into address space
+  InputEvent *shm_ptr = (InputEvent *)mmap(0, SHM_SIZE, PROT_READ | PROT_WRITE,
+                                           MAP_SHARED, fd, 0);
+
   // Consumer thread
-  std::thread consumer([&running, &q]() {
+  std::thread consumer([&running, &q, shm_ptr]() {
     while (running.load()) {
       InputEvent ev;
       while (q.pop(ev)) {
-        // Process information
+        // MAY NEED MORE SYNCHRONIZING SAFETY NETS
         // Send information to database
-        if (ev.key_code != 0)
-          std::cout << ev.key_code << std::endl;
+        shm_ptr->key_code = ev.key_code;
+        shm_ptr->flags = ev.flags;
+        shm_ptr->kind = ev.kind;
+        shm_ptr->timestamp = ev.timestamp;
+        shm_ptr->x = ev.x;
+        shm_ptr->y = ev.y;
+
+        usleep(10000); // Send at 100hz, may change
       }
-      std::this_thread::sleep_for(std::chrono::seconds(3));
+      std::this_thread::sleep_for(std::chrono::seconds(1));
     }
   });
 
@@ -91,5 +112,9 @@ int main() {
   consumer.join();
   CFRelease(source);
   CFRelease(handle);
+  munmap(shm_ptr, SHM_SIZE);
+  close(fd);
+  shm_unlink(shm_name);
+
   return 0;
 }
