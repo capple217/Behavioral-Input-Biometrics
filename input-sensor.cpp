@@ -18,11 +18,9 @@
 // Going to use boost.Lockfree for initial IMPL; later versions can utilize DIY
 // SPSC queue
 
-enum class EventKind { Key, Mouse };
-
 // May have to convert CGFloat
 struct InputEvent {
-  EventKind kind;
+  int kind; // 0 for keyboard, 1 for mouse
   int64_t key_code;
   CGEventFlags flags;
   CGFloat x;
@@ -39,10 +37,10 @@ static CGEventRef input_sensor(CGEventTapProxy proxy, CGEventType type,
   if (type == CGEventType::kCGEventKeyDown) {
     auto key_code = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
     auto flags = CGEventGetFlags(event);
-    q->push(InputEvent{EventKind::Key, key_code, flags, 0, 0, now});
+    q->push(InputEvent{0, key_code, flags, 0, 0, now});
   } else if (type == CGEventType::kCGEventMouseMoved) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{EventKind::Mouse, 0, 0, loc.x, loc.y, now});
+    q->push(InputEvent{1, 0, 0, loc.x, loc.y, now});
   }
 
   return event;

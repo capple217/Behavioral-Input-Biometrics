@@ -1,0 +1,33 @@
+import ctypes
+import time
+from multiprocessing import shared_memory
+
+
+class InputEvent(ctypes.Structure):
+    _fields_ = [
+        ("kind", ctypes.c_int),
+        ("key_code", ctypes.c_int64),
+        ("flags", ctypes.c_uint64),
+        ("x", ctypes.c_float),
+        ("y", ctypes.c_float),
+        ("timestamp", ctypes.c_int64),
+    ]
+
+
+shm_name = "BIBSharedMem"
+
+try:
+    shm = shared_memory.SharedMemory(name=shm_name)
+
+    # Continously read data from buffer
+    while True:
+        input_events = InputEvent.from_buffer(shm.buf)
+        print(f"Kind {input_events.kind}, key_code {input_events.key_code}")
+        time.sleep(0.01)  # 100Hz
+
+except KeyboardInterrupt:
+    print("Stopped reading.")
+
+finally:
+    # Cleanup
+    shm.close()
