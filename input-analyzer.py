@@ -23,6 +23,8 @@ try:
     while True:
         input_events = InputEvent.from_buffer(shm.buf)
         print(f"Kind {input_events.kind}, key_code {input_events.key_code}")
+        print(f"x {input_events.x}, y {input_events.y}")
+        print(f"Time {input_events.timestamp}")
         time.sleep(0.01)  # 100Hz
 
 except KeyboardInterrupt:

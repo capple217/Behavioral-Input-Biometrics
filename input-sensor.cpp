@@ -5,7 +5,6 @@
 #include <CoreFoundation/CFRunLoop.h>
 #include <CoreGraphics/CGEvent.h>
 #include <CoreGraphics/CGEventTypes.h>
-#include <boost/interprocess/managed_shared_memory.hpp>
 #include <chrono>
 #include <cstdint>
 #include <fcntl.h>
@@ -21,12 +20,13 @@
 // May have to convert CGFloat
 struct InputEvent {
   int kind; // 0 for keyboard, 1 for mouse
+  int dop;  // (down or up) 0 for down, 1 for up, 2 for dragged
   int64_t key_code;
   CGEventFlags flags;
+  int mouse_side; // 0 for neither, 1 for left, 2 for right, 3 for scrollwheel
   CGFloat x;
   CGFloat y;
   std::chrono::time_point<std::chrono::steady_clock> timestamp;
-  // ADD mouse dragged, mouse down, mouse let go
   // ADD current window open
 };
 
@@ -37,10 +37,32 @@ static CGEventRef input_sensor(CGEventTapProxy proxy, CGEventType type,
   if (type == CGEventType::kCGEventKeyDown) {
     auto key_code = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
     auto flags = CGEventGetFlags(event);
-    q->push(InputEvent{0, key_code, flags, 0, 0, now});
+    q->push(InputEvent{0, 0, key_code, flags, 0, 0, 0, now});
+  } else if (type == CGEventType::kCGEventKeyUp) {
+    auto key_code = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
+    auto flags = CGEventGetFlags(event);
+    q->push(InputEvent{0, 1, key_code, flags, 0, 0, 0, now});
   } else if (type == CGEventType::kCGEventMouseMoved) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 0, 0, loc.x, loc.y, now});
+    q->push(InputEvent{1, 0, 0, 0, 0, loc.x, loc.y, now});
+  } else if (type == CGEventType::kCGEventLeftMouseDown) {
+    CGPoint loc = CGEventGetLocation(event);
+    q->push(InputEvent{1, 0, 0, 0, 1, loc.x, loc.y, now});
+  } else if (type == CGEventType::kCGEventLeftMouseUp) {
+    CGPoint loc = CGEventGetLocation(event);
+    q->push(InputEvent{1, 1, 0, 0, 1, loc.x, loc.y, now});
+  } else if (type == CGEventType::kCGEventLeftMouseDragged) {
+    CGPoint loc = CGEventGetLocation(event);
+    q->push(InputEvent{1, 2, 0, 0, 1, loc.x, loc.y, now});
+  } else if (type == CGEventType::kCGEventRightMouseDown) {
+    CGPoint loc = CGEventGetLocation(event);
+    q->push(InputEvent{1, 0, 0, 0, 2, loc.x, loc.y, now});
+  } else if (type == CGEventType::kCGEventRightMouseUp) {
+    CGPoint loc = CGEventGetLocation(event);
+    q->push(InputEvent{1, 1, 0, 0, 2, loc.x, loc.y, now});
+  } else if (type == CGEventType::kCGEventRightMouseDragged) {
+    CGPoint loc = CGEventGetLocation(event);
+    q->push(InputEvent{1, 2, 0, 0, 2, loc.x, loc.y, now});
   }
 
   return event;
@@ -85,6 +107,8 @@ int main() {
         shm_ptr->timestamp = ev.timestamp;
         shm_ptr->x = ev.x;
         shm_ptr->y = ev.y;
+        shm_ptr->dop = ev.dop;
+        shm_ptr->mouse_side = ev.mouse_side;
 
         usleep(10000); // Send at 100hz, may change
       }
