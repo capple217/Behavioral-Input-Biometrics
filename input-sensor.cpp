@@ -26,6 +26,8 @@ struct InputEvent {
   int mouse_side; // 0 for neither, 1 for left, 2 for right, 3 for scrollwheel
   CGFloat x;
   CGFloat y;
+  int64_t delta_x;
+  int64_t delta_y;
   std::chrono::time_point<std::chrono::steady_clock> timestamp;
   // ADD current window open
 };
@@ -37,32 +39,38 @@ static CGEventRef input_sensor(CGEventTapProxy proxy, CGEventType type,
   if (type == CGEventType::kCGEventKeyDown) {
     auto key_code = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
     auto flags = CGEventGetFlags(event);
-    q->push(InputEvent{0, 0, key_code, flags, 0, 0, 0, now});
+    q->push(InputEvent{0, 0, key_code, flags, 0, 0, 0, 0, 0, now});
   } else if (type == CGEventType::kCGEventKeyUp) {
     auto key_code = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
     auto flags = CGEventGetFlags(event);
-    q->push(InputEvent{0, 1, key_code, flags, 0, 0, 0, now});
+    q->push(InputEvent{0, 1, key_code, flags, 0, 0, 0, 0, 0, now});
   } else if (type == CGEventType::kCGEventMouseMoved) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 3, 0, 0, 0, loc.x, loc.y, now});
+    int64_t deltaX = CGEventGetIntegerValueField(event, kCGMouseEventDeltaX);
+    int64_t deltaY = CGEventGetIntegerValueField(event, kCGMouseEventDeltaY);
+    q->push(InputEvent{1, 3, 0, 0, 0, loc.x, loc.y, deltaX, deltaY, now});
   } else if (type == CGEventType::kCGEventLeftMouseDown) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 0, 0, 0, 1, loc.x, loc.y, now});
+    q->push(InputEvent{1, 0, 0, 0, 1, loc.x, loc.y, 0, 0, now});
   } else if (type == CGEventType::kCGEventLeftMouseUp) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 1, 0, 0, 1, loc.x, loc.y, now});
+    q->push(InputEvent{1, 1, 0, 0, 1, loc.x, loc.y, 0, 0, now});
   } else if (type == CGEventType::kCGEventLeftMouseDragged) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 2, 0, 0, 1, loc.x, loc.y, now});
+    int64_t deltaX = CGEventGetIntegerValueField(event, kCGMouseEventDeltaX);
+    int64_t deltaY = CGEventGetIntegerValueField(event, kCGMouseEventDeltaY);
+    q->push(InputEvent{1, 2, 0, 0, 1, loc.x, loc.y, deltaX, deltaY, now});
   } else if (type == CGEventType::kCGEventRightMouseDown) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 0, 0, 0, 2, loc.x, loc.y, now});
+    q->push(InputEvent{1, 0, 0, 0, 2, loc.x, loc.y, 0, 0, now});
   } else if (type == CGEventType::kCGEventRightMouseUp) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 1, 0, 0, 2, loc.x, loc.y, now});
+    q->push(InputEvent{1, 1, 0, 0, 2, loc.x, loc.y, 0, 0, now});
   } else if (type == CGEventType::kCGEventRightMouseDragged) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 2, 0, 0, 2, loc.x, loc.y, now});
+    int64_t deltaX = CGEventGetIntegerValueField(event, kCGMouseEventDeltaX);
+    int64_t deltaY = CGEventGetIntegerValueField(event, kCGMouseEventDeltaY);
+    q->push(InputEvent{1, 2, 0, 0, 2, loc.x, loc.y, deltaX, deltaY, now});
   }
 
   return event;
@@ -109,6 +117,8 @@ int main() {
         shm_ptr->y = ev.y;
         shm_ptr->dop = ev.dop;
         shm_ptr->mouse_side = ev.mouse_side;
+        shm_ptr->delta_x = ev.delta_x;
+        shm_ptr->delta_y = ev.delta_y;
       }
       usleep(10000); // Send at 100hz, may change
     }

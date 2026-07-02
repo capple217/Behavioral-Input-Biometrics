@@ -12,6 +12,8 @@ class InputEvent(ctypes.Structure):
         ("mouse_side", ctypes.c_int),
         ("x", ctypes.c_float),
         ("y", ctypes.c_float),
+        ("delta_x", ctypes.c_int64),
+        ("delta_y", ctypes.c_int64),
         ("timestamp", ctypes.c_int64),
     ]
 
@@ -26,6 +28,7 @@ try:
         input_events = InputEvent.from_buffer(shm.buf)
         print(f"Kind {input_events.kind}, key_code {input_events.key_code}")
         print(f"x {input_events.x}, y {input_events.y}")
+        print(f"deltaX {input_events.delta_x}, deltaY {input_events.delta_y}")
         print(f"Time {input_events.timestamp}")
         time.sleep(0.01)  # 100Hz
 
