@@ -6,8 +6,10 @@ from multiprocessing import shared_memory
 class InputEvent(ctypes.Structure):
     _fields_ = [
         ("kind", ctypes.c_int),
+        ("dop", ctypes.c_int),
         ("key_code", ctypes.c_int64),
         ("flags", ctypes.c_uint64),
+        ("mouse_side", ctypes.c_int),
         ("x", ctypes.c_float),
         ("y", ctypes.c_float),
         ("timestamp", ctypes.c_int64),

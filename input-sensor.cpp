@@ -20,7 +20,7 @@
 // May have to convert CGFloat
 struct InputEvent {
   int kind; // 0 for keyboard, 1 for mouse
-  int dop;  // (down or up) 0 for down, 1 for up, 2 for dragged
+  int dop;  // (down or up) 0 for down, 1 for up, 2 for dragged, 3 for neither
   int64_t key_code;
   CGEventFlags flags;
   int mouse_side; // 0 for neither, 1 for left, 2 for right, 3 for scrollwheel
@@ -44,7 +44,7 @@ static CGEventRef input_sensor(CGEventTapProxy proxy, CGEventType type,
     q->push(InputEvent{0, 1, key_code, flags, 0, 0, 0, now});
   } else if (type == CGEventType::kCGEventMouseMoved) {
     CGPoint loc = CGEventGetLocation(event);
-    q->push(InputEvent{1, 0, 0, 0, 0, loc.x, loc.y, now});
+    q->push(InputEvent{1, 3, 0, 0, 0, loc.x, loc.y, now});
   } else if (type == CGEventType::kCGEventLeftMouseDown) {
     CGPoint loc = CGEventGetLocation(event);
     q->push(InputEvent{1, 0, 0, 0, 1, loc.x, loc.y, now});
@@ -109,15 +109,18 @@ int main() {
         shm_ptr->y = ev.y;
         shm_ptr->dop = ev.dop;
         shm_ptr->mouse_side = ev.mouse_side;
-
-        usleep(10000); // Send at 100hz, may change
       }
-      std::this_thread::sleep_for(std::chrono::seconds(1));
+      usleep(10000); // Send at 100hz, may change
     }
   });
 
   // Event tap
-  CGEventMask mask = (1 << kCGEventKeyDown) | (1 << kCGEventMouseMoved);
+  CGEventMask mask =
+      (1 << kCGEventKeyDown) | (1 << kCGEventKeyUp) |
+      (1 << kCGEventMouseMoved) | (1 << kCGEventLeftMouseDown) |
+      (1 << kCGEventLeftMouseUp) | (1 << kCGEventLeftMouseDragged) |
+      (1 << kCGEventRightMouseDown) | (1 << kCGEventRightMouseUp) |
+      (1 << kCGEventRightMouseDragged);
   CFMachPortRef handle =
       CGEventTapCreate(kCGHIDEventTap, kCGTailAppendEventTap,
                        kCGEventTapOptionListenOnly, mask, input_sensor, &q);
