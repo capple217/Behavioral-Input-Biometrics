@@ -15,7 +15,7 @@
 #include <thread>
 #include <unistd.h>
 
-constexpr CAPACITY = 50;
+constexpr int CAPACITY = 50;
 
 // Going to use boost.Lockfree for initial IMPL; later versions can utilize DIY
 // SPSC queue

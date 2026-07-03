@@ -2,6 +2,8 @@ import ctypes
 import time
 from multiprocessing import shared_memory
 
+import atomics
+
 
 class InputEvent(ctypes.Structure):
     _fields_ = [
@@ -18,6 +20,18 @@ class InputEvent(ctypes.Structure):
     ]
 
 
+CAPACITY = 50
+
+
+class SharedRing(ctypes.Structure):
+    _fields_ = [
+        ("write_idx", ctypes.c_uint64),
+        ("read_idx", ctypes.c_uint64),
+        ("dropped", ctypes.c_uint64),
+        ("slots", InputEvent * CAPACITY),
+    ]
+
+
 shm_name = "BIBSharedMem"
 
 try:
@@ -25,12 +39,12 @@ try:
 
     # Continously read data from buffer
     while True:
-        input_events = InputEvent.from_buffer(shm.buf)
-        print(f"Kind {input_events.kind}, key_code {input_events.key_code}")
-        print(f"x {input_events.x}, y {input_events.y}")
-        print(f"deltaX {input_events.delta_x}, deltaY {input_events.delta_y}")
-        print(f"Time {input_events.timestamp}")
-        time.sleep(0.01)  # 100Hz
+        SharedRing = SharedRing.from_buffer(shm.buf)
+        # print(f"Kind {SharedRing.slots[1].kind}, key_code {input_events.key_code}")
+        # print(f"x {input_events.x}, y {input_events.y}")
+        # print(f"deltaX {input_events.delta_x}, deltaY {input_events.delta_y}")
+        # print(f"Time {input_events.timestamp}")
+        # time.sleep(0.01)  # 100Hz
 
 except KeyboardInterrupt:
     print("Stopped reading.")
