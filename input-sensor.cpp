@@ -5,6 +5,7 @@
 #include <CoreFoundation/CFRunLoop.h>
 #include <CoreGraphics/CGEvent.h>
 #include <CoreGraphics/CGEventTypes.h>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <fcntl.h>
@@ -13,6 +14,8 @@
 #include <sys/mman.h>
 #include <thread>
 #include <unistd.h>
+
+constexpr CAPACITY = 50;
 
 // Going to use boost.Lockfree for initial IMPL; later versions can utilize DIY
 // SPSC queue
@@ -76,6 +79,13 @@ static CGEventRef input_sensor(CGEventTapProxy proxy, CGEventType type,
   return event;
 }
 
+struct SharedRing {
+  std::atomic<uint64_t> write_idx;
+  std::atomic<uint64_t> read_idx;
+  std::atomic<int64_t> dropped;
+  InputEvent slots[CAPACITY];
+};
+
 int main() {
   // Check accessability permissions
   /*
@@ -93,32 +103,45 @@ int main() {
 
   // Create shared memory object
   const char *shm_name = "/BIBSharedMem";
-  const size_t SHM_SIZE = sizeof(InputEvent);
+  const size_t SHM_SIZE = sizeof(SharedRing);
   // May want to change mode permissions
   int fd = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
   ftruncate(fd, SHM_SIZE);
 
   // Map shared mem into address space
-  InputEvent *shm_ptr = (InputEvent *)mmap(0, SHM_SIZE, PROT_READ | PROT_WRITE,
+  SharedRing *shm_ptr = (SharedRing *)mmap(0, SHM_SIZE, PROT_READ | PROT_WRITE,
                                            MAP_SHARED, fd, 0);
+  shm_ptr->read_idx = 0;
+  shm_ptr->write_idx = 0;
+  shm_ptr->dropped = 0;
 
   // Consumer thread
   std::thread consumer([&running, &q, shm_ptr]() {
     while (running.load()) {
       InputEvent ev;
       while (q.pop(ev)) {
-        // MAY NEED MORE SYNCHRONIZING SAFETY NETS
-        // Send information to database
-        shm_ptr->key_code = ev.key_code;
-        shm_ptr->flags = ev.flags;
-        shm_ptr->kind = ev.kind;
-        shm_ptr->timestamp = ev.timestamp;
-        shm_ptr->x = ev.x;
-        shm_ptr->y = ev.y;
-        shm_ptr->dop = ev.dop;
-        shm_ptr->mouse_side = ev.mouse_side;
-        shm_ptr->delta_x = ev.delta_x;
-        shm_ptr->delta_y = ev.delta_y;
+        // Send information to database at current write_idx
+        uint64_t r = shm_ptr->read_idx.load(std::memory_order_acquire);
+        uint64_t w = shm_ptr->write_idx.load(std::memory_order_relaxed);
+        if (w - r >= CAPACITY) {
+          // write_idx is too far ahead, so we skip all incoming events until we
+          // have space and update drop counter for data to know
+          shm_ptr->dropped.fetch_add(1, std::memory_order_relaxed);
+          continue;
+        }
+        shm_ptr->slots[w % CAPACITY].key_code = ev.key_code;
+        shm_ptr->slots[w % CAPACITY].flags = ev.flags;
+        shm_ptr->slots[w % CAPACITY].kind = ev.kind;
+        shm_ptr->slots[w % CAPACITY].timestamp = ev.timestamp;
+        shm_ptr->slots[w % CAPACITY].x = ev.x;
+        shm_ptr->slots[w % CAPACITY].y = ev.y;
+        shm_ptr->slots[w % CAPACITY].dop = ev.dop;
+        shm_ptr->slots[w % CAPACITY].mouse_side = ev.mouse_side;
+        shm_ptr->slots[w % CAPACITY].delta_x = ev.delta_x;
+        shm_ptr->slots[w % CAPACITY].delta_y = ev.delta_y;
+
+        // Increment write_idx
+        shm_ptr->write_idx.store(w + 1, std::memory_order_release);
       }
       usleep(10000); // Send at 100hz, may change
     }
