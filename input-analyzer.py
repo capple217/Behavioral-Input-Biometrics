@@ -1,8 +1,7 @@
 import ctypes
+import mmap
 import time
 from multiprocessing import shared_memory
-
-import atomics
 
 
 class InputEvent(ctypes.Structure):
@@ -12,8 +11,8 @@ class InputEvent(ctypes.Structure):
         ("key_code", ctypes.c_int64),
         ("flags", ctypes.c_uint64),
         ("mouse_side", ctypes.c_int),
-        ("x", ctypes.c_float),
-        ("y", ctypes.c_float),
+        ("x", ctypes.c_double),
+        ("y", ctypes.c_double),
         ("delta_x", ctypes.c_int64),
         ("delta_y", ctypes.c_int64),
         ("timestamp", ctypes.c_int64),
@@ -36,19 +35,22 @@ shm_name = "BIBSharedMem"
 
 try:
     shm = shared_memory.SharedMemory(name=shm_name)
-
+    ring = SharedRing.from_buffer(shm.buf)
     # Continously read data from buffer
     while True:
-        SharedRing = SharedRing.from_buffer(shm.buf)
-        # print(f"Kind {SharedRing.slots[1].kind}, key_code {input_events.key_code}")
-        # print(f"x {input_events.x}, y {input_events.y}")
-        # print(f"deltaX {input_events.delta_x}, deltaY {input_events.delta_y}")
-        # print(f"Time {input_events.timestamp}")
-        # time.sleep(0.01)  # 100Hz
+        w = ring.write_idx
+        r = ring.read_idx
+        if r == w:
+            time.sleep(0.001)
+            continue
+        ev = ring.slots[r % CAPACITY]
+        print(f"x {ev.x} y{ev.y}")
+        ring.read_idx = r + 1
 
 except KeyboardInterrupt:
     print("Stopped reading.")
 
 finally:
     # Cleanup
+    del ring
     shm.close()
