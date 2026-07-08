@@ -3,6 +3,8 @@ import mmap
 import time
 from multiprocessing import shared_memory
 
+import torch
+
 
 class InputEvent(ctypes.Structure):
     _fields_ = [
@@ -44,7 +46,11 @@ try:
             time.sleep(0.001)
             continue
         ev = ring.slots[r % CAPACITY]
-        print(f"x {ev.x} y{ev.y}")
+        # Utilizing data
+        values = [getattr(ev, name) for name, _ in ev._fields_]
+        tt = torch.tensor(values, dtype=torch.float64)
+        print(tt)
+        # Done working with it, time to get next set
         ring.read_idx = r + 1
 
 except KeyboardInterrupt:
