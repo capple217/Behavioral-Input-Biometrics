@@ -1,0 +1,4 @@
+  keystroke     EER 0.116   at alpha=0.05: FRR 0.071  FAR 0.272
+  mouse         EER 0.264   at alpha=0.05: FRR 0.062  FAR 0.572
+  fused_fisher  EER 0.110   at alpha=0.05: FRR 0.062  FAR 0.341
+  fused_mean2   EER 0.176   at alpha=0.05: FRR 0.002  FAR 0.733

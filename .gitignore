@@ -1,0 +1,14 @@
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+build/
+build-*/
+# recorded sessions are keystroke logs: never commit them
+data/
+*.pt
+*.bin
+.DS_Store
