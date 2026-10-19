@@ -1,0 +1,56 @@
+== 1. harness validation (51 benchmark subjects)
+  Euclidean                        ours 0.171 (0.095)   published 0.171 (0.095)
+  Manhattan (scaled)               ours 0.096 (0.069)   published 0.096 (0.069)
+  Nearest neighbor (Mahalanobis)   ours 0.100 (0.064)   published 0.100 (0.064)
+== 2. tuning on 75 disjoint lab subjects
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1304
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1581
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0851
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0922
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1268
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1584
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0840
+  ae {'hidden': 16, 'bottleneck': 4, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0915
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1388
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1618
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0874
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0903
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1343
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1587
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0855
+  ae {'hidden': 16, 'bottleneck': 12, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0893
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1307
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1552
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0793
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0849
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1250
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1547
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0767
+  ae {'hidden': 64, 'bottleneck': 4, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0827
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1521
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.0, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1643
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0922
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.0, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0980
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l1', 'n_seeds': 1} -> 0.1461
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.2, 'transform': 'log', 'score_norm': 'l2', 'n_seeds': 1} -> 0.1625
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1} -> 0.0867
+  ae {'hidden': 64, 'bottleneck': 12, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1} -> 0.0898
+  seq {'hidden': 16, 'bottleneck': 4, 'epochs': 60} -> 0.1033
+  seq {'hidden': 16, 'bottleneck': 4, 'epochs': 150} -> 0.0941
+  seq {'hidden': 16, 'bottleneck': 8, 'epochs': 60} -> 0.1018
+  seq {'hidden': 16, 'bottleneck': 8, 'epochs': 150} -> 0.0925
+  seq {'hidden': 32, 'bottleneck': 4, 'epochs': 60} -> 0.0992
+  seq {'hidden': 32, 'bottleneck': 4, 'epochs': 150} -> 0.0885
+  seq {'hidden': 32, 'bottleneck': 8, 'epochs': 60} -> 0.1008
+  seq {'hidden': 32, 'bottleneck': 8, 'epochs': 150} -> 0.0893
+  chosen: {'ae': {'hidden': 64, 'bottleneck': 4, 'noise': 0.2, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 3}, 'seq': {'hidden': 32, 'bottleneck': 4, 'epochs': 150}}
+== 3. benchmark (51 subjects, frozen configs)
+  Manhattan (scaled)           0.096 (0.069)
+  Autoencoder (ours)           0.096 (0.057)
+  LSTM autoencoder (ours)      0.111 (0.071)
+== 4. conformal calibration, test on sessions 5-8
+  Manhattan (scaled)     random        FRR@.05=0.031 FAR@.05=0.345 FRR@.10=0.105 FAR@.10=0.151  by-session@.05=[0.0271, 0.0298, 0.0267, 0.0416]
+  Manhattan (scaled)     cross_session FRR@.05=0.073 FAR@.05=0.270 FRR@.10=0.181 FAR@.10=0.105  by-session@.05=[0.0494, 0.0549, 0.0769, 0.1102]
+  Autoencoder (ours)     random        FRR@.05=0.030 FAR@.05=0.389 FRR@.10=0.090 FAR@.10=0.173  by-session@.05=[0.0278, 0.0259, 0.0278, 0.0373]
+  Autoencoder (ours)     cross_session FRR@.05=0.048 FAR@.05=0.336 FRR@.10=0.130 FAR@.10=0.136  by-session@.05=[0.04, 0.0376, 0.0502, 0.0624]
+done in 1110.2 s

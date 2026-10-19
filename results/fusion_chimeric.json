@@ -1,0 +1,18 @@
+{
+ "keystroke_eer": 0.1157,
+ "keystroke_frr": 0.0706,
+ "keystroke_far": 0.2722,
+ "mouse_eer": 0.2636,
+ "mouse_frr": 0.0619,
+ "mouse_far": 0.5718,
+ "fused_fisher_eer": 0.1095,
+ "fused_fisher_frr": 0.0619,
+ "fused_fisher_far": 0.3412,
+ "fused_mean2_eer": 0.1758,
+ "fused_mean2_frr": 0.0018,
+ "fused_mean2_far": 0.733,
+ "alpha": 0.05,
+ "k_actions": 10,
+ "n_pairings": 200,
+ "runtime_s": 41.2
+}

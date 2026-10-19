@@ -1,0 +1,22 @@
+users 10, test sessions 816, actions/session median 62.0
+  tune {'hidden': 32, 'bottleneck': 6, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1, 'epochs': 300} {1: 0.3505025303669324, 10: 0.30318485180964205}
+  tune {'hidden': 32, 'bottleneck': 6, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1, 'epochs': 300} {1: 0.3512681099273333, 10: 0.3140816134654708}
+  tune {'hidden': 32, 'bottleneck': 12, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1, 'epochs': 300} {1: 0.3418344368061935, 10: 0.2863069326943502}
+  tune {'hidden': 32, 'bottleneck': 12, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1, 'epochs': 300} {1: 0.34175438380979206, 10: 0.2992963010251306}
+  tune {'hidden': 64, 'bottleneck': 6, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1, 'epochs': 300} {1: 0.3523913445025629, 10: 0.3055436104452733}
+  tune {'hidden': 64, 'bottleneck': 6, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1, 'epochs': 300} {1: 0.3528854475720074, 10: 0.3127455701412733}
+  tune {'hidden': 64, 'bottleneck': 12, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l1', 'n_seeds': 1, 'epochs': 300} {1: 0.3411595252916659, 10: 0.2802884292674587}
+  tune {'hidden': 64, 'bottleneck': 12, 'noise': 0.1, 'transform': 'none', 'score_norm': 'l2', 'n_seeds': 1, 'epochs': 300} {1: 0.34182499390810167, 10: 0.2906377124607342}
+== Manhattan (scaled): action EER 0.417; k=1: 0.389; k=5: 0.374; k=10: 0.357; k=20: 0.324; k=50: 0.337; k=all: 0.328
+   k=  1: FRR@.05 0.020 FAR@.05 0.907 | FRR@.10 0.050 FAR@.10 0.847
+   k=  5: FRR@.05 0.047 FAR@.05 0.751 | FRR@.10 0.090 FAR@.10 0.669
+   k= 10: FRR@.05 0.061 FAR@.05 0.698 | FRR@.10 0.099 FAR@.10 0.614
+   k= 20: FRR@.05 0.068 FAR@.05 0.616 | FRR@.10 0.116 FAR@.10 0.577
+   k= 50: FRR@.05 0.088 FAR@.05 0.603 | FRR@.10 0.140 FAR@.10 0.562
+== Autoencoder (ours): action EER 0.349; k=1: 0.335; k=5: 0.301; k=10: 0.249; k=20: 0.229; k=50: 0.216; k=all: 0.222
+   k=  1: FRR@.05 0.025 FAR@.05 0.718 | FRR@.10 0.051 FAR@.10 0.678
+   k=  5: FRR@.05 0.051 FAR@.05 0.666 | FRR@.10 0.106 FAR@.10 0.611
+   k= 10: FRR@.05 0.062 FAR@.05 0.572 | FRR@.10 0.092 FAR@.10 0.531
+   k= 20: FRR@.05 0.086 FAR@.05 0.516 | FRR@.10 0.136 FAR@.10 0.453
+   k= 50: FRR@.05 0.123 FAR@.05 0.387 | FRR@.10 0.185 FAR@.10 0.346
+done in 197.1 s
